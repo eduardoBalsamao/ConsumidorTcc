@@ -1,10 +1,10 @@
 
-# Base
+# Sistema para o TCC
 
-Essa é a minha base inicial para apps do tipo menu lateral.
+Esse sistema expõe as informações energeticas sobre dispositivos coletadas com o Consumidor Connect.
 
 ## Imagens:
 
 
 ###### Exemplo:
-![alt text](https://i.imgur.com/zZO2yLg.png)
+![alt text](https://i.imgur.com/JWiuiQH.png)
