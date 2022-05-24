@@ -34,8 +34,21 @@ const ListItemLink: React.FC<IListItemLinkProps> = ({ to, icon, label, onClick }
   );
 };
 
-const drawerTheme = createTheme({
+const drawerThemeLight = createTheme({
   palette:{
+    background:{
+      paper: '#263f60'
+    }
+  },
+  typography: {
+    allVariants: {
+      color: 'white',
+    }
+  }
+});
+const drawerThemeDark = createTheme({
+  palette:{
+    mode: 'dark',
     background:{
       paper: '#1F334E'
     }
@@ -56,7 +69,7 @@ export const MenuLateral: React.FC = ({ children }) => {
 
   return (
     <>
-      <ThemeProvider theme={drawerTheme}>
+      <ThemeProvider theme={theme.palette.mode === 'dark' ? drawerThemeDark : drawerThemeLight}>
         <Drawer  open={isDrawerOpen} variant={smDown ? 'temporary' : 'permanent'} onClose={toggleDrawerOpen}>
           <Box  width={theme.spacing(28)} height="100%" display="flex" flexDirection="column">
 
@@ -71,7 +84,7 @@ export const MenuLateral: React.FC = ({ children }) => {
 
             <Divider variant='middle'  sx={{ backgroundColor: `${theme.palette.secondary.main}`, borderBottomWidth: 2}} />
 
-            <Box flex={1}>
+            <Box marginTop='2vh' flex={1}>
               <List component="nav">
                 {drawerOptions.map(drawerOption => (
                   <ListItemLink

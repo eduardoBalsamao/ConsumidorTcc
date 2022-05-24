@@ -19,26 +19,42 @@ export const Login = () =>{
   return (
     <Box>
       <LayoutLogin>
+        {/* ------- Box para titulo e logo INICIO -------*/}
         <Box sx={{paddingTop: '5vh'}}>
           <img style={{height: '80px'}} src='/logo192.png' />
           <LoginTitle fontWeight='bold' variant='h3'>Portal do Cliente</LoginTitle>
         </Box>
+        {/* ------- Box para titulo e logo FINAL -------*/}
+
+        {/* ------- Box para inputs INICIO -------*/}
         <Box sx={{ paddingTop: '2vh', width: {xs: '70%', md: '40%'}}}>
           <InputLogin sx={{marginY: '3vh'}} color="secondary" fullWidth variant="standard" label="E-mail"></InputLogin>
           <InputLogin sx={{marginY: '3vh'}} color="secondary" fullWidth variant="standard" label="Senha"></InputLogin>
         </Box>
+        {/* ------- Box para inputs FINAL -------*/}
+
+        {/* ------- Box para registrar-se e lembrar senha INICIO -------*/}
         <Box sx={{width: {xs: '70%', md: '40%'}, flexDirection: {xs: 'column', md: 'row'}}} display='flex' alignItems='center' justifyContent='space-between'>
           <FormControlLabel sx={{color: 'white', marginBottom: {xs: '10px'}}}  control={<Checkbox color="secondary" sx={{color: 'white'}} defaultChecked />} label="Lembrar minha senha" />
           <Link onClick={handleClickOpen} variant="text" >Criar uma conta</Link>
         </Box>
+        {/* ------- Box para registrar-se e lembrar senha FINAL -------*/}
+
+        {/* ------- Box botão de entrar iNICIO -------*/}
         <Box sx={{paddingTop: '5vh', width: {xs: '70%', md: '40%'}}}>
           <Button fullWidth color="secondary" variant="contained"> Entrar </Button>
         </Box>
+        {/* ------- Box botão de entrar FINAL -------*/}
         
+        {/* ------- Box rodapé INICIO -------*/}
         <Box sx={{position: 'absolute', bottom: 15}} display='flex' alignItems='center' >
           <LoginTitle fontWeight='bold' variant='h6'>Connect Group</LoginTitle>
         </Box>
+        {/* ------- Box rodapé FINAL -------*/}
+
       </LayoutLogin>
+
+      {/* ------- Dialog para criar uma conta INICIO -------*/}
       <Dialog fullWidth PaperProps={{style:{backgroundColor: '#373737'}}} open={open} onClose={handleClose}>
         <Box display='flex' justifyContent='space-between' alignContent='center'>
           <DialogTitle sx={{color:'#FFFFFF'}}>Crie sua conta gratuita!</DialogTitle>
@@ -82,6 +98,7 @@ export const Login = () =>{
           <Button color='secondary' variant='contained' onClick={handleClose}>Criar</Button>
         </DialogActions>
       </Dialog>
+      {/* ------- Dialog para criar uma conta FINAL -------*/}
 
     </Box>
   );
