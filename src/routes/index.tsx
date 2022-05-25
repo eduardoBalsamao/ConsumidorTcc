@@ -5,6 +5,7 @@ import { useDrawerContext } from '../shared/contexts';
 import { PaginaInicial } from '../pages';
 import { Login } from '../pages';
 import { MenuLateral } from '../shared/components';
+import { PrivateRoute } from '../shared/components/private-route/PrivateRoute';
 
 export const AppRoutes = () => {
   const { setDrawerOptions } = useDrawerContext();
@@ -13,7 +14,7 @@ export const AppRoutes = () => {
     setDrawerOptions([
       {
         icon: 'home',
-        path: '/pagina-inicial',
+        path: '/',
         label: 'Página inicial',
       },
     ]);
@@ -21,10 +22,12 @@ export const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/pagina-inicial" element={<MenuLateral><PaginaInicial /></MenuLateral>} />
+      <Route element={<PrivateRoute />}>
+        <Route path="/" element={<MenuLateral><PaginaInicial /></MenuLateral>} />
+      </Route>
+
       <Route path="/login" element={<Login />} />
 
-      <Route path="*" element={<Navigate to="/pagina-inicial" />} />
     </Routes>
   );
 };

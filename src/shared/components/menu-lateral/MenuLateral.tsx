@@ -4,6 +4,7 @@ import { Box } from '@mui/system';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import { useAppThemeContext, useDrawerContext } from '../../contexts';
+import {auth} from '../../firebase';
 import LoginTitle from '../login-title/LoginTitle';
 
 interface IListItemLinkProps {
@@ -63,9 +64,14 @@ const drawerThemeDark = createTheme({
 export const MenuLateral: React.FC = ({ children }) => {
   const theme = useTheme();
   const smDown = useMediaQuery(theme.breakpoints.down('md'));
-
+  const navigate = useNavigate();
   const { isDrawerOpen, drawerOptions, toggleDrawerOpen } = useDrawerContext();
   const { toggleTheme } = useAppThemeContext();
+  
+  const signOut = async () => {
+    await auth.signOut();
+    navigate('/');
+  };
 
   return (
     <>
@@ -105,6 +111,16 @@ export const MenuLateral: React.FC = ({ children }) => {
                     <Icon sx={{color: '#FFFFFF'}}>dark_mode</Icon>
                   </ListItemIcon>
                   <ListItemText primary="Alternar tema" />
+                </ListItemButton>
+              </List>
+            </Box>
+            <Box>
+              <List component="nav">
+                <ListItemButton onClick={()=>{signOut();}} >
+                  <ListItemIcon>
+                    <Icon sx={{color: '#FFFFFF'}}>logout</Icon>
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
                 </ListItemButton>
               </List>
             </Box>

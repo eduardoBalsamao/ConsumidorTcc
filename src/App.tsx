@@ -2,19 +2,22 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { AppThemeProvider, DrawerProvider } from './shared/contexts';
 import { AppRoutes } from './routes';
+import { AuthProvider } from './shared/components/provider/AuthProvider';
 
 export const App = () => {
   return (
     <AppThemeProvider>
-      <DrawerProvider>
-        <BrowserRouter>
+      <AuthProvider>
+        <DrawerProvider>
+          <BrowserRouter>
 
 
-          <AppRoutes />
+            <AppRoutes />
 
 
-        </BrowserRouter>
-      </DrawerProvider>
+          </BrowserRouter>
+        </DrawerProvider>
+      </AuthProvider>
     </AppThemeProvider>
   );
 };
