@@ -39,21 +39,21 @@ export const PaginaInicial = () => {
         <Box margin={theme.spacing(4)}>
           <Grid container rowSpacing={smDown ? 2 : 4} columnSpacing={{ xs: 1, sm: 2, md: 3 }} display='flex' flexDirection='row' alignItems='center' flexWrap='wrap' >
             
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} md={6} lg={4}>
               <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='red'></Item>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} md={6} lg={4}>
               <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='blue'></Item>
             </Grid>
 
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} md={6} lg={4}>
               <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='green'></Item>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} md={6} lg={4}>
               <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='green'></Item>
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} md={6} lg={4}>
               <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='green'></Item>
             </Grid>
 

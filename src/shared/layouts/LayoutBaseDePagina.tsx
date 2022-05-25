@@ -14,13 +14,11 @@ export const LayoutBaseDePagina: React.FC = ({ children }) => {
   return (
     <Box height="100%" display="flex" flexDirection="column" gap={1}>
       <Box sx={{
-        backgroundColor:{xs: `${theme.palette.primary.main}`, sm: 'transparent'},
-        display: {xs: 'flex', sm: 'none'}
+        backgroundColor:{xs: `${theme.palette.primary.main}`, md: 'transparent'},
+        display: {md: 'flex', lg: 'none'}
       }} 
-      
-      
       padding={1} alignItems="center" gap={1} height={theme.spacing(smDown ? 4 : mdDown ? 4 : 6)}>
-        {smDown && (
+        {mdDown && (
           <Box width='100%' display='flex' alignItems='center' >
             <IconButton sx={{alignSelf: 'flex-start'}} onClick={toggleDrawerOpen}>
               <Icon>menu</Icon>

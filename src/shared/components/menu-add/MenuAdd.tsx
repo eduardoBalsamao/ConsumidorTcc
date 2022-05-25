@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, useTheme, useMediaQuery, Theme, Divider, Icon, ButtonBase, Typography, Box, InputLabel, InputBase, Menu, Fab} from '@mui/material';
+import { Button, useTheme, useMediaQuery, Theme, Divider, Typography, Box, InputLabel, InputBase, Menu, Fab} from '@mui/material';
 import { useState } from 'react';
 import { alpha, styled } from '@mui/material/styles';
 import { TwitterPicker   } from 'react-color';
@@ -51,6 +51,7 @@ export const MenuAdd: React.FC= ({children}) => {
   const [itemColor, setItemColor] = useState('gray');
   const menu = Boolean(anchorEl);
 
+  // eslint-disable-next-line
   const handleChange = (color: any) => {
     setItemColor(color.hex);
   };
@@ -62,22 +63,16 @@ export const MenuAdd: React.FC= ({children}) => {
     setAnchorEl(null);
   };
 
+  // eslint-disable-next-line
   const [open, setOpen] = useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
   const theme = useTheme();
  
   return (
     <>
       {/* ------- Drawer para adicionar dispositivos INICIO -------*/}
 
-      <Box  width={smDown ? theme.spacing(42) : theme.spacing(100) } height="100%" display="flex" flexDirection="column"> 
+      <Box  width={smDown ? '80vw' : theme.spacing(100) } height="100%" display="flex" flexDirection="column"> 
 
         {children}
 
