@@ -5,9 +5,15 @@ import LoginTitle from '../../shared/components/login-title/LoginTitle';
 import Link from '../../shared/components/link/Link';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
+import app from '../../shared/firebase';
+import {auth} from '../../shared/firebase';
+import {getDatabase, ref, set} from 'firebase/database';
 
 export const Login = () =>{
   const [open, setOpen] = useState(false);
+  const [emailRegister, setEmailRegister] = useState('');
+  const [passwordRegister, setPasswordRegister] = useState('');
+  const database = getDatabase(app);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -15,6 +21,21 @@ export const Login = () =>{
 
   const handleClose = () => {
     setOpen(false);
+  };
+  const handleChangeEmailRegister = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmailRegister(event.target.value);
+  };
+  const handleChangePasswordRegister = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordRegister(event.target.value);
+  };
+
+  const createAccount = async () => {
+    try {
+      await auth.createUserWithEmailAndPassword(emailRegister, passwordRegister);
+      console.log('Registro feito');
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <Box>
@@ -72,6 +93,7 @@ export const Login = () =>{
             variant="standard"
             color="secondary"
             sx={{marginY: '2vh'}}
+            onChange={handleChangeEmailRegister}
           />
           <InputLogin
             autoFocus
@@ -82,20 +104,12 @@ export const Login = () =>{
             variant="standard"
             color="secondary"
             sx={{marginY: '2vh'}}
+            onChange={handleChangePasswordRegister}
           />
-          <InputLogin
-            autoFocus
-            margin="dense"
-            label="Confirmação de Senha"
-            type="password"
-            fullWidth
-            variant="standard"
-            color="secondary"
-            sx={{marginY: '2vh'}}
-          />
+
         </DialogContent>
         <DialogActions sx={{padding: '5vh'}}>
-          <Button color='secondary' variant='contained' onClick={handleClose}>Criar</Button>
+          <Button color='secondary' variant='contained' onClick={()=>(createAccount())}>Criar</Button>
         </DialogActions>
       </Dialog>
       {/* ------- Dialog para criar uma conta FINAL -------*/}
