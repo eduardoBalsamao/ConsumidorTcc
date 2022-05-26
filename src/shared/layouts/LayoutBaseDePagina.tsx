@@ -10,7 +10,7 @@ export const LayoutBaseDePagina: React.FC = ({ children }) => {
   const theme = useTheme();
 
   const { toggleDrawerOpen } = useDrawerContext();
-
+ 
   return (
     <Box height="100%" display="flex" flexDirection="column" gap={1}>
       <Box sx={{

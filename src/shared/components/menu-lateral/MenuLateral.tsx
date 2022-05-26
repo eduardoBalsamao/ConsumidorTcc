@@ -1,8 +1,8 @@
-import { Avatar, Divider, Drawer, Icon, List, ListItemButton, ListItemIcon, ListItemText, useMediaQuery, useTheme} from '@mui/material';
+import { Avatar, Divider, Drawer, Icon, List, ListItemButton, ListItemIcon, ListItemText, useMediaQuery, useTheme, CircularProgress, Modal} from '@mui/material';
 import { useMatch, useNavigate, useResolvedPath } from 'react-router-dom';
 import { Box } from '@mui/system';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-
+import { useState } from 'react';
 import { useAppThemeContext, useDrawerContext } from '../../contexts';
 import {auth} from '../../firebase';
 import LoginTitle from '../login-title/LoginTitle';
@@ -60,6 +60,11 @@ const drawerThemeDark = createTheme({
     }
   }
 });
+function delay(n: number){
+  return new Promise(function(resolve){
+    setTimeout(resolve,n*1000);
+  });
+}
 
 export const MenuLateral: React.FC = ({ children }) => {
   const theme = useTheme();
@@ -67,9 +72,16 @@ export const MenuLateral: React.FC = ({ children }) => {
   const navigate = useNavigate();
   const { isDrawerOpen, drawerOptions, toggleDrawerOpen } = useDrawerContext();
   const { toggleTheme } = useAppThemeContext();
+  const [loading, setLoading] = useState(false);
+  const handleLoading = () => setLoading(true);
+  const handleLoadingClose = () => setLoading(false);
+
   
   const signOut = async () => {
+    handleLoading();
+    await delay(0.75);
     await auth.signOut();
+    handleLoadingClose();
     navigate('/');
   };
 
@@ -131,6 +143,22 @@ export const MenuLateral: React.FC = ({ children }) => {
       <Box height="100vh" marginLeft={smDown ? 0 : theme.spacing(28)}>
         {children}
       </Box>
+      <Modal
+        open={loading}
+        aria-labelledby="Carregando"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '1vh',
+          backgroundColor: 'transparent',
+          p: 4,
+        }}>
+          <CircularProgress sx={{color: '#f5d561'}} />
+        </Box>
+      </Modal>
     </>
   );
 };

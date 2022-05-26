@@ -1,4 +1,4 @@
-import {Box, FormControlLabel, Checkbox, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import {Box, FormControlLabel, Checkbox, CircularProgress, Modal, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material';
 import {LayoutLogin} from '../../shared/layouts';
 import InputLogin from '../../shared/components/input-login/InputLogin';
 import LoginTitle from '../../shared/components/login-title/LoginTitle';
@@ -10,6 +10,7 @@ import app from '../../shared/firebase';
 import {auth} from '../../shared/firebase';
 import {getDatabase, ref, set} from 'firebase/database';
 
+
 export const Login = () =>{
   const [open, setOpen] = useState(false);
   const [emailRegister, setEmailRegister] = useState('');
@@ -17,6 +18,10 @@ export const Login = () =>{
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [checked, setChecked] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const handleLoading = () => setLoading(true);
+  const handleLoadingClose = () => setLoading(false);
+
   const navigate = useNavigate();
   const database = getDatabase(app);
 
@@ -27,7 +32,7 @@ export const Login = () =>{
   const handleClose = () => {
     setOpen(false);
   };
-
+ 
   const handleChangeEmail = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
@@ -46,6 +51,7 @@ export const Login = () =>{
   };
 
   const signIn = async () => {
+    handleLoading();
     if(checked == true){
       localStorage.setItem('lsCode', email);
       localStorage.setItem('lsPass', password);
@@ -55,9 +61,11 @@ export const Login = () =>{
     }
     try {
       await auth.signInWithEmailAndPassword(email, password);
+      handleLoadingClose();
       navigate('/');
     } catch (error) {
       console.log(error);
+      handleLoadingClose();
     }
   };
 
@@ -156,6 +164,22 @@ export const Login = () =>{
         </DialogActions>
       </Dialog>
       {/* ------- Dialog para criar uma conta FINAL -------*/}
+      <Modal
+        open={loading}
+        aria-labelledby="Carregando"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '1vh',
+          backgroundColor: 'transparent',
+          p: 4,
+        }}>
+          <CircularProgress sx={{color: '#f5d561'}} />
+        </Box>
+      </Modal>
 
     </Box>
   );

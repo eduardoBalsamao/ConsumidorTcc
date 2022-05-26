@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, useTheme, useMediaQuery, Theme, Divider, Icon, Grid, SwipeableDrawer, Box, ButtonBase, Typography} from '@mui/material';
 import { Item } from '../../shared/components/item/Item';
 import { LayoutBaseDePagina, PaperLayout } from '../../shared/layouts';
@@ -13,6 +12,8 @@ export const PaginaInicial = () => {
   //const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
 
   const [open, setOpen] = useState(false);
+  
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -86,5 +87,6 @@ export const PaginaInicial = () => {
       {/* ------- Drawer para adicionar dispositivos FINAL -------*/}  
 
     </LayoutBaseDePagina>
+    
   );
 };

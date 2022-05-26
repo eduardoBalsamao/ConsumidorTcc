@@ -46,7 +46,7 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 
 export const MenuAdd: React.FC= ({children}) => {
   const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
-  //const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+  const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [itemColor, setItemColor] = useState('gray');
   const menu = Boolean(anchorEl);
@@ -72,7 +72,7 @@ export const MenuAdd: React.FC= ({children}) => {
     <>
       {/* ------- Drawer para adicionar dispositivos INICIO -------*/}
 
-      <Box  width={smDown ? '80vw' : theme.spacing(100) } height="100%" display="flex" flexDirection="column"> 
+      <Box  width={mdDown ? '88vw' : theme.spacing(100) } height="100%" display="flex" flexDirection="column"> 
 
         {children}
 
@@ -90,7 +90,7 @@ export const MenuAdd: React.FC= ({children}) => {
           justifyContent='center'
           paddingTop={theme.spacing(2)} paddingRight={smDown ? 0 : theme.spacing(3)} paddingLeft={smDown ?  0 : theme.spacing(12)}>
           <Typography color={theme.palette.mode== 'light' ? theme.palette.primary.main : theme.palette.secondary.main} variant='h5'>1. Detalhes basicos</Typography>
-          <Typography variant='body2'>Dê um nome ao seu dispositivo e diga seu tipo.</Typography>
+          <Typography textAlign={smDown ? 'center' : 'start'} margin={theme.spacing(1)} variant='body2'>Dê um nome ao seu dispositivo e informe o tipo.</Typography>
           <Divider />
         </Box>
         {/* ------- Box do form FINAL -------*/}
@@ -129,7 +129,7 @@ export const MenuAdd: React.FC= ({children}) => {
           justifyContent='center'
           paddingTop={theme.spacing(2)} paddingRight={smDown ? 0 : theme.spacing(3)} paddingLeft={smDown ?  0 : theme.spacing(12)}>
           <Typography color={theme.palette.mode== 'light' ? theme.palette.primary.main : theme.palette.secondary.main} variant='h5'>2. Detalhes Tecnicos</Typography>
-          <Typography variant='body2'>Procure o identificador na embalagem do produto.</Typography>
+          <Typography textAlign={smDown ? 'center' : 'start'} variant='body2'>Procure o identificador na embalagem do produto. O identificador é único e você pode compartilha-lo.</Typography>
           <Divider />
         </Box>
         {/* ------- Box do form FINAL -------*/}
