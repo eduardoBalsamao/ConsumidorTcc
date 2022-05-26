@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import { useDrawerContext } from '../shared/contexts';
 import { PaginaInicial } from '../pages';

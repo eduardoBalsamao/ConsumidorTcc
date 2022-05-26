@@ -4,14 +4,15 @@ import InputLogin from '../../shared/components/input-login/InputLogin';
 import LoginTitle from '../../shared/components/login-title/LoginTitle';
 import Link from '../../shared/components/link/Link';
 import CloseIcon from '@mui/icons-material/Close';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {useNavigate} from 'react-router-dom';
-import app from '../../shared/firebase';
+import { AuthContext } from '../../shared/contexts';
 import {auth} from '../../shared/firebase';
-import {getDatabase, ref, set} from 'firebase/database';
+import { getDatabase, ref, set } from 'firebase/database';
 
 
 export const Login = () =>{
+  const user = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const [emailRegister, setEmailRegister] = useState('');
   const [passwordRegister, setPasswordRegister] = useState('');
@@ -23,7 +24,7 @@ export const Login = () =>{
   const handleLoadingClose = () => setLoading(false);
 
   const navigate = useNavigate();
-  const database = getDatabase(app);
+  const database = getDatabase();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -80,10 +81,20 @@ export const Login = () =>{
 
   const createAccount = async () => {
     try {
-      await auth.createUserWithEmailAndPassword(emailRegister, passwordRegister);
-      console.log('Registro feito');
+      await auth.createUserWithEmailAndPassword(emailRegister, passwordRegister).then(()=>{
+        set(ref(database, 'users/' + auth?.currentUser?.uid), {
+          email: email,
+        })
+          .then(() => {
+            navigate('/');
+          })
+          .catch((error) => {
+            //console.log('Data failed');
+          });
+      });
+      //console.log('Registro feito');
     } catch (error) {
-      console.error(error);
+      alert('Falha eu realizar registro');
     }
   };
   return (

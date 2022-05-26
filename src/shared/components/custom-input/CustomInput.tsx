@@ -6,7 +6,6 @@ interface IInputProps {
     id: string;
     placeholder: string;
     label: string;
-    color?: string
   }
 
 
@@ -50,7 +49,7 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 
 
 
-export const CustomInput: React.FC<IInputProps> = ({id, placeholder, label, color}) => {
+export const CustomInput: React.FC<IInputProps> = ({id, placeholder, label}) => {
   return (
     <>
       <InputLabel htmlFor={id}>

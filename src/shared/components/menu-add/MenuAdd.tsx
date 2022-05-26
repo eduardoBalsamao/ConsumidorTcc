@@ -1,9 +1,14 @@
 import React from 'react';
-import { Button, useTheme, useMediaQuery, Theme, Divider, Typography, Box, InputLabel, InputBase, Menu, Fab} from '@mui/material';
-import { useState } from 'react';
+import { Button, useTheme, useMediaQuery, Theme, Divider, Typography, 
+  Box, InputLabel, InputBase, Menu, Fab, Dialog, DialogActions, 
+  DialogContent, DialogContentText, DialogTitle  } from '@mui/material';
+import { useState, useContext } from 'react';
 import { alpha, styled } from '@mui/material/styles';
 import { TwitterPicker   } from 'react-color';
 import PaletteIcon from '@mui/icons-material/Palette';
+import {getDatabase, ref, get, set, update} from 'firebase/database';
+import app from '../../firebase';
+import { AuthContext } from '../../contexts';
 
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
@@ -16,7 +21,7 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
     border: '1px solid #ced4da',
     fontSize: 16,
-    width: 'auto',
+    
     padding: '10px 12px',
     transition: theme.transitions.create([
       'border-color',
@@ -47,9 +52,52 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 export const MenuAdd: React.FC= ({children}) => {
   const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
   const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+  const user = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [itemColor, setItemColor] = useState('gray');
   const menu = Boolean(anchorEl);
+  const database = getDatabase();
+  const [savedPass, setSavedPass] = useState('');
+
+  const [name, setName] = useState('');
+  const handleChangeName = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value);
+  };
+
+  const [code, setCode] = useState('');
+  const handleChangeCode = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCode(event.target.value);
+  };
+
+  const [local, setLocal] = useState('');
+  const handleChangeLocal = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLocal(event.target.value);
+  };
+
+
+  const [password, setPassword] = useState('');
+  const handleChangePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  };
+
+  const [openNewModal, setOpenNewModal] = useState(false);
+  const handleClickOpenNewModal = () => {
+    setOpenNewModal(true);
+  };
+
+  const handleCloseNewModal = () => {
+    setOpenNewModal(false);
+  };
+
+  const [openExistModal, setOpenExistModal] = useState(false);
+  const handleClickOpenExistModal = () => {
+    setOpenExistModal(true);
+  };
+
+  const handleCloseExistModal = () => {
+    setOpenExistModal(false);
+  };
+
+  const [itemColor, setItemColor] = useState('gray');
 
   // eslint-disable-next-line
   const handleChange = (color: any) => {
@@ -63,8 +111,91 @@ export const MenuAdd: React.FC= ({children}) => {
     setAnchorEl(null);
   };
 
-  // eslint-disable-next-line
-  const [open, setOpen] = useState(false);
+
+  const verifyNew = () =>{
+    
+    if(name.length < 1){ 
+      alert('nome vazio');
+      return;
+    }
+    if(local.length < 1){ 
+      alert('local vazio');
+      return;
+    }
+    if(code.length < 1){ 
+      alert('code vazio');
+      return;
+    }
+
+    get(ref(database, `/dispositivos/${code}/password`) ).then((snapshot)=>{
+      const data = snapshot.val();
+      setSavedPass(snapshot.val());
+      if(snapshot.exists()){
+        if(data != ''){
+          handleClickOpenExistModal();
+          //Função que verifica se as senhas são iguais 
+          //Esse aparelho ja foi registrado por outra pessoa use a senha para ter acesso a esses dados. Caso isso seja um erro comunique conosco.
+        }
+        if(data == ''){
+          handleClickOpenNewModal();
+        }
+      } else{
+        alert('codigo invalido');
+      }
+    });
+      
+  };
+  const addNew = () =>{
+    set(ref(database, `users/${user?.uid}/dispositivos/${code}`), {
+      name: name,
+      code: code,
+      color: itemColor,
+      local: local,
+    })
+      .then(() => {
+        update(ref(database, `dispositivos/${code}`),{
+          password: password
+        });
+        setPassword('');
+        handleCloseNewModal();
+        handleCloseExistModal();
+      })
+      .catch((error) => {
+        console.log('Error');
+        setPassword('');
+        handleCloseNewModal();
+        handleCloseExistModal();
+      });
+    
+  };
+  const addExist = () =>{
+    if(savedPass == password){
+      set(ref(database, `users/${user?.uid}/dispositivos/${code}`), {
+        name: name,
+        code: code,
+        color: itemColor,
+        local: local,
+      })
+        .then(() => {
+          update(ref(database, `dispositivos/${code}`),{
+            password: password
+          });
+          setPassword('');
+          handleCloseNewModal();
+          handleCloseExistModal();
+        })
+        .catch((error) => {
+          console.log('Error');
+          setPassword('');
+          handleCloseNewModal();
+          handleCloseExistModal();
+        });
+    } else {
+      alert('error');
+    }
+    
+  };
+  
 
   const theme = useTheme();
  
@@ -90,7 +221,7 @@ export const MenuAdd: React.FC= ({children}) => {
           justifyContent='center'
           paddingTop={theme.spacing(2)} paddingRight={smDown ? 0 : theme.spacing(3)} paddingLeft={smDown ?  0 : theme.spacing(12)}>
           <Typography color={theme.palette.mode== 'light' ? theme.palette.primary.main : theme.palette.secondary.main} variant='h5'>1. Detalhes basicos</Typography>
-          <Typography textAlign={smDown ? 'center' : 'start'} margin={theme.spacing(1)} variant='body2'>Dê um nome ao seu dispositivo e informe o tipo.</Typography>
+          <Typography textAlign={smDown ? 'center' : 'start'} margin={theme.spacing(1)} variant='body2'>Dê um nome ao seu dispositivo e informe o local.</Typography>
           <Divider />
         </Box>
         {/* ------- Box do form FINAL -------*/}
@@ -107,13 +238,13 @@ export const MenuAdd: React.FC= ({children}) => {
               <InputLabel htmlFor='nome'>
                 Nome do Dispositivo
               </InputLabel>
-              <BootstrapInput placeholder='Me dê um nome...' id='nome' />
+              <BootstrapInput value={name} onChange={handleChangeName} placeholder='Me dê um nome...' id='nome' />
             </Box>
             <Box marginTop= {smDown ? '2vh' : '0'}>
               <InputLabel htmlFor='tipo'>
-                Tipo
+                Local
               </InputLabel>
-              <BootstrapInput placeholder='Onde estou...' id='yipo' />
+              <BootstrapInput value={local} onChange={handleChangeLocal} placeholder='Onde estou...' id='yipo' />
             </Box>
           </Box>
         </Box>
@@ -146,7 +277,7 @@ export const MenuAdd: React.FC= ({children}) => {
               <InputLabel htmlFor='nome'>
                   Identificador
               </InputLabel>
-              <BootstrapInput placeholder='t111' id='nome' />
+              <BootstrapInput value={code} onChange={handleChangeCode} placeholder='gc001' id='nome' />
             </Box>
           </Box>
         </Box>
@@ -175,9 +306,9 @@ export const MenuAdd: React.FC= ({children}) => {
             sx={{backgroundColor: `${itemColor}`}}
             id="basic-button"
             size='small'
-            aria-controls={open ? 'basic-menu' : undefined}
+
             aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
+
             onClick={handleClickColor}
           >
             <PaletteIcon />
@@ -203,12 +334,64 @@ export const MenuAdd: React.FC= ({children}) => {
           alignItems='center'
           justifyContent='center'
           paddingTop={theme.spacing(3)} paddingRight={smDown ? 0 : theme.spacing(3)} paddingLeft={smDown ?  0 : theme.spacing(12)}>
-          <Button color={theme.palette.mode == 'light' ? 'primary' : 'secondary'} sx={{width: {xs: '75%', md: '50%'}}} variant='contained'>Adicionar</Button>
+          <Button onClick={()=>{verifyNew();}} color={theme.palette.mode == 'light' ? 'primary' : 'secondary'} sx={{width: {xs: '75%', md: '50%'}}} variant='contained'>Adicionar</Button>
         </Box>
         {/* ------- Box dos Botão FINAL -------*/}
+
           
 
 
+      </Box>
+      <Box>
+        <Dialog open={openNewModal} onClose={handleCloseNewModal}>
+          <DialogTitle>Defina uma nova senha</DialogTitle>
+          <Divider />
+          <DialogContent>
+            <DialogContentText marginBottom={theme.spacing(3)} textAlign='center'>
+            Obrigado por adiquirir um dispositivo connect.
+              <Divider />
+            </DialogContentText>
+            <Box display='flex' flexDirection='column' sx={{width: '100%'}}>
+              <InputLabel htmlFor='password'>
+                Senha
+              </InputLabel>
+              <BootstrapInput sx={{width: '100%'}} value={password} onChange={handleChangePassword} placeholder='Senha...' id='password' />
+            </Box>
+            <DialogContentText marginTop={theme.spacing(3)}>
+             *Essa senha será usada caso deseje compartilhar os dados do dispositivo com outras pessoas.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseNewModal}>Cancelar</Button>
+            <Button onClick={()=>{addNew();}}>Confirmar</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+
+      <Box>
+        <Dialog open={openExistModal} onClose={handleCloseExistModal}>
+          <DialogTitle>Forneça a senha</DialogTitle>
+          <Divider />
+          <DialogContent>
+            <DialogContentText marginBottom={theme.spacing(3)} textAlign='center'>
+            Ops! Indentificamos que esse dispositivo já tem uma senha.
+              <Divider />
+            </DialogContentText>
+            <Box display='flex' flexDirection='column' sx={{width: '100%'}}>
+              <InputLabel htmlFor='password'>
+                Senha
+              </InputLabel>
+              <BootstrapInput sx={{width: '100%'}} value={password} onChange={handleChangePassword} placeholder='Senha...' id='password' />
+            </Box>
+            <DialogContentText marginTop={theme.spacing(3)}>
+             *Esse aparelho já foi registrado por outra pessoa use a senha que ela criou para ter acesso a esses dados. Caso isso seja um erro comunique conosco.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseExistModal}>Cancelar</Button>
+            <Button onClick={()=>{addExist();}}>Confirmar</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
       {/* ------- Drawer para adicionar dispositivos FINAL -------*/}  
