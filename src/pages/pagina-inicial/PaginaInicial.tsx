@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, useTheme, useMediaQuery, Theme, Divider, Icon, Grid, SwipeableDrawer, Box, ButtonBase, Typography} from '@mui/material';
 import { Item } from '../../shared/components/item/Item';
 import { LayoutBaseDePagina, PaperLayout } from '../../shared/layouts';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MenuAdd } from '../../shared/components/menu-add/MenuAdd';
+import { getDatabase, ref, onValue} from 'firebase/database';
+import {auth} from '../../shared/firebase';
 
 
 
@@ -10,9 +13,11 @@ import { MenuAdd } from '../../shared/components/menu-add/MenuAdd';
 export const PaginaInicial = () => {
   const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
   //const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
-
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
-  
+  const database = getDatabase();
+  const [data, setData] = useState<any[]>([]);
+  const produtosRef = ref(database, `/users/${auth?.currentUser?.uid}/dispositivos`);
 
 
   const handleClickOpen = () => {
@@ -22,7 +27,28 @@ export const PaginaInicial = () => {
   const handleClose = () => {
     setOpen(false);
   };
-  const theme = useTheme();
+
+  //Função que recolhe os dados sobre os produtos do usuario logado
+  function produtosFetch () {
+    onValue(produtosRef, (snapshot) => {
+      const d: any = []; //Data temporaria
+      snapshot.forEach(item => {
+        console.log(item.val());
+        const produtos = {
+          nome: item.val().name, //Nome
+          code: item.val().code,
+          local: item.val().local,
+          color: item.val().color
+
+        };
+        d.push(produtos);
+      });
+      setData(d);
+    });
+  }
+  useEffect(() => {
+    produtosFetch();
+  }, []);
 
   return (
     <LayoutBaseDePagina>
@@ -33,30 +59,19 @@ export const PaginaInicial = () => {
           <Button onClick={handleClickOpen} startIcon={<Icon>add</Icon>} color={theme.palette.mode === 'dark' ? 'secondary' : 'primary'} fullWidth={smDown ? true : false} variant='contained'> Adicionar Dispositivo</Button>
         </Box>
         {/* ------- Box do botão adicionar FINAL -------*/}
-
         <Divider variant='middle' />
 
         {/* ------- Box dos itens INICIO -------*/}
         <Box margin={theme.spacing(4)}>
           <Grid container rowSpacing={smDown ? 2 : 4} columnSpacing={{ xs: 1, sm: 2, md: 3 }} display='flex' flexDirection='row' alignItems='center' flexWrap='wrap' >
-            
-            <Grid item xs={12} md={6} lg={4}>
-              <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='red'></Item>
-            </Grid>
+            {data.map((item) => {
+              return(
+                <Grid key={item.code} item xs={12} md={6} lg={4}>
+                  <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title={item?.nome} subtitle={item?.local} status='Ligado' color={item?.color}></Item>
+                </Grid>
+              );
+            })}
 
-            <Grid item xs={12} md={6} lg={4}>
-              <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='blue'></Item>
-            </Grid>
-
-            <Grid item xs={12} md={6} lg={4}>
-              <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='green'></Item>
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='green'></Item>
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title='Lampada' subtitle='Quarto' status='Ligado' color='green'></Item>
-            </Grid>
 
           </Grid>
         </Box>

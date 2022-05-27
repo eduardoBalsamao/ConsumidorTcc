@@ -1,22 +1,22 @@
-import {Box, FormControlLabel, Checkbox, CircularProgress, Modal, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import {Box, FormControlLabel, Checkbox, CircularProgress, Modal, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Collapse, Alert } from '@mui/material';
 import {LayoutLogin} from '../../shared/layouts';
 import InputLogin from '../../shared/components/input-login/InputLogin';
 import LoginTitle from '../../shared/components/login-title/LoginTitle';
 import Link from '../../shared/components/link/Link';
 import CloseIcon from '@mui/icons-material/Close';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
-import { AuthContext } from '../../shared/contexts';
 import {auth} from '../../shared/firebase';
 import { getDatabase, ref, set } from 'firebase/database';
 
 
 export const Login = () =>{
-  const user = useContext(AuthContext);
   const [open, setOpen] = useState(false);
+  const [openError, setOpenError] = useState(false);
   const [emailRegister, setEmailRegister] = useState('');
   const [passwordRegister, setPasswordRegister] = useState('');
   const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
   const [password, setPassword] = useState('');
   const [checked, setChecked] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -60,14 +60,15 @@ export const Login = () =>{
       localStorage.setItem('lsCode', '');
       localStorage.setItem('lsPass', '');
     }
-    try {
-      await auth.signInWithEmailAndPassword(email, password);
+
+    await auth.signInWithEmailAndPassword(email, password).then(()=>{
       handleLoadingClose();
       navigate('/');
-    } catch (error) {
-      console.log(error);
+    }).catch(()=>{
+      setError('Erro ao fazer login!');
+      setOpenError(true);
       handleLoadingClose();
-    }
+    });
   };
 
   useEffect(() => {
@@ -80,22 +81,38 @@ export const Login = () =>{
   }, []);
 
   const createAccount = async () => {
-    try {
-      await auth.createUserWithEmailAndPassword(emailRegister, passwordRegister).then(()=>{
-        set(ref(database, 'users/' + auth?.currentUser?.uid), {
-          email: email,
+    handleLoading();
+    await auth.createUserWithEmailAndPassword(emailRegister, passwordRegister).then(()=>{
+      set(ref(database, 'users/' + auth?.currentUser?.uid), {
+        email: emailRegister,
+      })
+        .then(() => {
+          handleLoadingClose();
+          navigate('/');
         })
-          .then(() => {
-            navigate('/');
-          })
-          .catch((error) => {
-            //console.log('Data failed');
-          });
-      });
-      //console.log('Registro feito');
-    } catch (error) {
-      alert('Falha eu realizar registro');
-    }
+        .catch(() => {
+          //console.log('Data failed');
+        });
+    }).catch((error) =>{
+      setError('Erro ao realizar registro!');
+      setOpenError(true);
+      handleLoadingClose();
+      if(error.code == 'auth/email-already-in-use'){
+        setError('Esse email ja foi cadastrado!');
+        setOpenError(true);
+        handleLoadingClose();
+      }
+      if(error.code == 'auth/invalid-email'){
+        setError('Esse email não é valido!');
+        setOpenError(true);
+        handleLoadingClose();
+      }
+      if(error.code == 'auth/weak-password'){
+        setError('Sua senha está fraca! Sua senha deve ter pelo menos que 6 caracteres!');
+        setOpenError(true);
+        handleLoadingClose();
+      } 
+    });
   };
   return (
     <Box>
@@ -109,8 +126,8 @@ export const Login = () =>{
 
         {/* ------- Box para inputs INICIO -------*/}
         <Box sx={{ paddingTop: '2vh', width: {xs: '70%', md: '40%'}}}>
-          <InputLogin value={email} onChange={handleChangeEmail} sx={{marginY: '3vh'}} color="secondary" fullWidth variant="standard" label="E-mail"></InputLogin>
-          <InputLogin value={password} onChange={handleChangePassword} sx={{marginY: '3vh'}} color="secondary" fullWidth variant="standard" label="Senha"></InputLogin>
+          <InputLogin value={email} onChange={handleChangeEmail} sx={{marginY: '2vh'}} color="secondary" fullWidth variant="standard" label="E-mail"></InputLogin>
+          <InputLogin value={password} onChange={handleChangePassword} sx={{marginY: '2vh'}} color="secondary" fullWidth variant="standard" label="Senha"></InputLogin>
         </Box>
         {/* ------- Box para inputs FINAL -------*/}
 
@@ -122,9 +139,31 @@ export const Login = () =>{
           <Link onClick={handleClickOpen} variant="text" >Criar uma conta</Link>
         </Box>
         {/* ------- Box para registrar-se e lembrar senha FINAL -------*/}
+        <Box sx={{width: {md: '40%', xs: '75%'}}}>
+          <Collapse in={openError}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOpenError(false);
+                  }}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              {error}
+            </Alert>
+          </Collapse>
+        </Box>
 
         {/* ------- Box botão de entrar iNICIO -------*/}
-        <Box sx={{paddingTop: '5vh', width: {xs: '70%', md: '40%'}}}>
+        <Box sx={{paddingTop: '2vh', width: {xs: '70%', md: '40%'}}}>
           <Button onClick={()=>{signIn();}} fullWidth color="secondary" variant="contained"> Entrar </Button>
         </Box>
         {/* ------- Box botão de entrar FINAL -------*/}
@@ -168,6 +207,26 @@ export const Login = () =>{
             sx={{marginY: '2vh'}}
             onChange={handleChangePasswordRegister}
           />
+          <Collapse in={openError}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setOpenError(false);
+                  }}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              {error}
+            </Alert>
+          </Collapse>
 
         </DialogContent>
         <DialogActions sx={{padding: '5vh'}}>

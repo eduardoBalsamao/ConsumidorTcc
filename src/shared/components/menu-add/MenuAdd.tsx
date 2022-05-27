@@ -1,13 +1,13 @@
-import React from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import { Button, useTheme, useMediaQuery, Theme, Divider, Typography, 
   Box, InputLabel, InputBase, Menu, Fab, Dialog, DialogActions, 
-  DialogContent, DialogContentText, DialogTitle  } from '@mui/material';
+  DialogContent, DialogContentText, DialogTitle, Backdrop, Alert, Collapse,
+  IconButton} from '@mui/material';
 import { useState, useContext } from 'react';
 import { alpha, styled } from '@mui/material/styles';
 import { TwitterPicker   } from 'react-color';
 import PaletteIcon from '@mui/icons-material/Palette';
 import {getDatabase, ref, get, set, update} from 'firebase/database';
-import app from '../../firebase';
 import { AuthContext } from '../../contexts';
 
 
@@ -55,8 +55,26 @@ export const MenuAdd: React.FC= ({children}) => {
   const user = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menu = Boolean(anchorEl);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const database = getDatabase();
   const [savedPass, setSavedPass] = useState('');
+  const [open, setOpen] = useState(false);
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleToggle = (errorParam: string) => {
+    setError(errorParam);
+    setOpen(true);
+  };
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const handleCloseSuccess = () => {
+    setOpenSuccess(false);
+  };
+  const handleToggleSuccess = (successParam: string) => {
+    setSuccess(successParam);
+    setOpenSuccess(true);
+  };
 
   const [name, setName] = useState('');
   const handleChangeName = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,61 +133,44 @@ export const MenuAdd: React.FC= ({children}) => {
   const verifyNew = () =>{
     
     if(name.length < 1){ 
-      alert('nome vazio');
+      //alert('nome vazio');
+      handleToggle('O campo nome está vazio');
       return;
     }
     if(local.length < 1){ 
-      alert('local vazio');
+      //alert('local vazio');
+      handleToggle('O campo local está vazio');
       return;
     }
     if(code.length < 1){ 
-      alert('code vazio');
+      //alert('code vazio');
+      handleToggle('O campo código está vazio');
       return;
     }
 
-    get(ref(database, `/dispositivos/${code}/password`) ).then((snapshot)=>{
-      const data = snapshot.val();
-      setSavedPass(snapshot.val());
-      if(snapshot.exists()){
-        if(data != ''){
+    get(ref(database, `/dispositivos/${code}`) ).then((snapshot)=>{
+      if(snapshot.val() != null){
+        const pass = snapshot.val().password;
+        console.log(snapshot.val());
+        setSavedPass(snapshot.val().password);
+        if(pass != ''){
           handleClickOpenExistModal();
           //Função que verifica se as senhas são iguais 
           //Esse aparelho ja foi registrado por outra pessoa use a senha para ter acesso a esses dados. Caso isso seja um erro comunique conosco.
         }
-        if(data == ''){
+        if(pass == ''){
           handleClickOpenNewModal();
         }
       } else{
-        alert('codigo invalido');
+        //alert('codigo invalido');
+        handleToggle('O código digitado é invalido!');
       }
     });
       
   };
   const addNew = () =>{
-    set(ref(database, `users/${user?.uid}/dispositivos/${code}`), {
-      name: name,
-      code: code,
-      color: itemColor,
-      local: local,
-    })
-      .then(() => {
-        update(ref(database, `dispositivos/${code}`),{
-          password: password
-        });
-        setPassword('');
-        handleCloseNewModal();
-        handleCloseExistModal();
-      })
-      .catch((error) => {
-        console.log('Error');
-        setPassword('');
-        handleCloseNewModal();
-        handleCloseExistModal();
-      });
-    
-  };
-  const addExist = () =>{
-    if(savedPass == password){
+    console.log(password.length);
+    if(password.length > 1){
       set(ref(database, `users/${user?.uid}/dispositivos/${code}`), {
         name: name,
         code: code,
@@ -183,15 +184,48 @@ export const MenuAdd: React.FC= ({children}) => {
           setPassword('');
           handleCloseNewModal();
           handleCloseExistModal();
+          handleToggleSuccess('Dispositivo adcicionado com sucesso!');
         })
-        .catch((error) => {
-          console.log('Error');
+        .catch(() => {
+          handleToggle('Error ao adcionar');
           setPassword('');
           handleCloseNewModal();
           handleCloseExistModal();
         });
     } else {
-      alert('error');
+      handleToggle('Error ao adcionar');
+    }
+    
+  };
+  const addExist = () =>{
+    if(password.length != 0){
+      if(savedPass == password){
+        set(ref(database, `users/${user?.uid}/dispositivos/${code}`), {
+          name: name,
+          code: code,
+          color: itemColor,
+          local: local,
+        })
+          .then(() => {
+            update(ref(database, `dispositivos/${code}`),{
+              password: password
+            });
+            setPassword('');
+            handleCloseNewModal();
+            handleCloseExistModal();
+            handleToggleSuccess('Dispositivo adcicionado com sucesso!');
+          })
+          .catch(() => {
+            handleToggle('Error ao adcionar 2');
+            setPassword('');
+            handleCloseNewModal();
+            handleCloseExistModal();
+          });
+      } else {
+        handleToggle('Error ao adcionar');
+      }
+    } else {
+      handleToggle('Error ao adcionar');
     }
     
   };
@@ -360,6 +394,29 @@ export const MenuAdd: React.FC= ({children}) => {
             <DialogContentText marginTop={theme.spacing(3)}>
              *Essa senha será usada caso deseje compartilhar os dados do dispositivo com outras pessoas.
             </DialogContentText>
+            <Box sx={{width: '100%'}}>
+              <Collapse in={open}>
+                <Alert
+                  severity="error"
+                  action={
+                    <IconButton
+                      aria-label="close"
+                      color="inherit"
+                      size="small"
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      <CloseIcon fontSize="inherit" />
+                    </IconButton>
+                  }
+                  sx={{ mb: 2 }}
+                >
+                  {error}
+                </Alert>
+              </Collapse>
+            </Box>
+            
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseNewModal}>Cancelar</Button>
@@ -386,6 +443,28 @@ export const MenuAdd: React.FC= ({children}) => {
             <DialogContentText marginTop={theme.spacing(3)}>
              *Esse aparelho já foi registrado por outra pessoa use a senha que ela criou para ter acesso a esses dados. Caso isso seja um erro comunique conosco.
             </DialogContentText>
+            <Box sx={{width: '100%'}}>
+              <Collapse in={open}>
+                <Alert
+                  severity="error"
+                  action={
+                    <IconButton
+                      aria-label="close"
+                      color="inherit"
+                      size="small"
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                    >
+                      <CloseIcon fontSize="inherit" />
+                    </IconButton>
+                  }
+                  sx={{ mb: 2 }}
+                >
+                  {error}
+                </Alert>
+              </Collapse>
+            </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseExistModal}>Cancelar</Button>
@@ -393,6 +472,34 @@ export const MenuAdd: React.FC= ({children}) => {
           </DialogActions>
         </Dialog>
       </Box>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={open}
+        onClick={handleClose}
+      >
+        <Box sx={{width: {md: '30%', xs: '75%'}}}>
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+          >
+            {error}
+          </Alert>
+        </Box>
+      </Backdrop>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openSuccess}
+        onClick={handleCloseSuccess}
+      >
+        <Box sx={{width: {md: '30%', xs: '75%'}}}>
+          <Alert
+            severity="success"
+            sx={{ mb: 2 }}
+          >
+            {success}
+          </Alert>
+        </Box>
+      </Backdrop>
 
       {/* ------- Drawer para adicionar dispositivos FINAL -------*/}  
     </>
