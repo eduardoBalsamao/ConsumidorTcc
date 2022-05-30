@@ -67,7 +67,7 @@ export const PaginaInicial = () => {
             {data.map((item) => {
               return(
                 <Grid key={item.code} item xs={12} md={6} lg={4}>
-                  <Item onClick2={()=>{console.log('Teste2');}} onClick={()=>{console.log('Altera no firebase');}} title={item?.nome} subtitle={item?.local} status='Ligado' color={item?.color}></Item>
+                  <Item code={item.code} title={item?.nome} subtitle={item?.local} color={item?.color}></Item>
                 </Grid>
               );
             })}

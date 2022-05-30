@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import { useDrawerContext } from '../shared/contexts';
-import { PaginaInicial } from '../pages';
+import { PaginaInicial, Dashboard} from '../pages';
 import { Login } from '../pages';
 import { MenuLateral } from '../shared/components';
 import { PrivateRoute } from '../shared/components/private-route/PrivateRoute';
@@ -24,6 +24,9 @@ export const AppRoutes = () => {
     <Routes>
       <Route element={<PrivateRoute />}>
         <Route path="/" element={<MenuLateral><PaginaInicial /></MenuLateral>} />
+      </Route>
+      <Route element={<PrivateRoute />}>
+        <Route path="/dashboard/:code" element={<MenuLateral><Dashboard /></MenuLateral>} />
       </Route>
 
       <Route path="/login" element={<Login />} />
