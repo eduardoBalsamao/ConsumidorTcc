@@ -53,7 +53,7 @@ export const Item: React.FC<IItemProps> = ({title, subtitle, color, code}) => {
 
   useEffect(() => {
     statusVerify();
-  }, []);
+  });
   return (
     <>
  

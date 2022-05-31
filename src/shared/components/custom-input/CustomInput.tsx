@@ -6,7 +6,7 @@ interface IInputProps {
     id: string;
     placeholder: string;
     label: string;
-  }
+}
 
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({

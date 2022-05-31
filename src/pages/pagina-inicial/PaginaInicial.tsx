@@ -33,7 +33,6 @@ export const PaginaInicial = () => {
     onValue(produtosRef, (snapshot) => {
       const d: any = []; //Data temporaria
       snapshot.forEach(item => {
-        console.log(item.val());
         const produtos = {
           nome: item.val().name, //Nome
           code: item.val().code,
