@@ -1,4 +1,4 @@
-import {Box, Divider, Paper, Typography, useTheme, TextField, Button} from '@mui/material';
+import {Box, Divider, Paper, Typography, useTheme, TextField, Button, useMediaQuery, Theme} from '@mui/material';
 import { LayoutBaseDePagina, PaperLayout } from '../../shared/layouts';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -9,6 +9,8 @@ import { Line, XAxis, YAxis, CartesianGrid, Legend , LineChart, Tooltip } from '
 export const Dashboard = () =>{
   const database = getDatabase();
   const codeParam = useParams();
+  const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
+  //const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const [data, setData] = useState<any[]>([]);
   const [historico, setHistorico] = useState();
   const theme = useTheme();
@@ -115,9 +117,9 @@ export const Dashboard = () =>{
         <Paper  elevation={3} sx={{margin: '3vh', height: '100%'}}>
           <Box display='flex' flexDirection='column' >
             <Box sx={{paddingTop: '1vh'}}>
-              <Typography variant='h6' textAlign='center'>Historico</Typography>
+              <Typography variant='h6' textAlign='center'>Historico - Energia</Typography>
             </Box>
-            <Box display='flex' justifyContent='flex-end' marginTop='3vh' marginRight='6vh'>
+            <Box display='flex' justifyContent='flex-end' marginTop='3vh' marginRight={smDown ? '1vh' : '4.5vh'} marginLeft={smDown ? '1vh' : '0'}>
               <TextField
                 id="date"
                 label="Selecionar Intervalo de Tempo"
@@ -132,13 +134,13 @@ export const Dashboard = () =>{
               />
               <Button variant='contained' onClick={historicFetch}>Atualizar</Button>
             </Box>
-            <Box display='flex' justifyContent='center' marginX='3vh'>
-              <LineChart width={900} height={300} data={historico}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <Box display='flex' justifyContent='center' marginX='3vh' marginTop={smDown ? '2vh' : 0}>
+              <LineChart width={smDown ? 300 : 900} height={300} data={historico}
+                margin={smDown ? { top: 5, right: 10, left: 0, bottom: 5 } : { top: 5, right: 11, left: 11, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="hora">
                 </XAxis>
-                <YAxis label={{ value: 'KW/H', angle: -90, position: 'insideLeft' }} />
+                <YAxis label={smDown ? {display: 'none'} : { value: 'KW/H', angle: -90, position: 'insideLeft' }} />
                 <Tooltip />
                 <Legend verticalAlign="top" height={36} />
                 <Line type="monotone" dataKey="KWH" stroke={theme.palette.mode == 'dark' ? theme.palette.secondary.main : theme.palette.primary.main} />
