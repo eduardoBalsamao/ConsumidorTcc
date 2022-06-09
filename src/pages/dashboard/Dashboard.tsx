@@ -1,18 +1,38 @@
-import {Box, Divider, Paper, Typography, useTheme} from '@mui/material';
+import {Box, Divider, Paper, Typography, useTheme, TextField, Button} from '@mui/material';
 import { LayoutBaseDePagina, PaperLayout } from '../../shared/layouts';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue} from 'firebase/database';
+import { Line, XAxis, YAxis, CartesianGrid, Legend , LineChart, Tooltip } from 'recharts';
+
 
 export const Dashboard = () =>{
   const database = getDatabase();
   const codeParam = useParams();
   const [data, setData] = useState<any[]>([]);
+  const [historico, setHistorico] = useState();
   const theme = useTheme();
+  const meses = ['0', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+
+  const dateSupp = new Date();
+  const [dia, setDia] = useState(String(dateSupp.getDate()).padStart(2, '0'));
+  const [mes, setMes] = useState(String(dateSupp.getMonth() + 1).padStart(2, '0'));
+  const [ano, setAno] = useState(String(dateSupp.getFullYear()));
+  const dataAtual = ano + '-' + mes + '-' + dia;
+
+  const [date, setDate] = useState(dataAtual);
+
+  const handleChangeData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDate(event.target.value);
+    setDia(event.target.value.substring(8,10));
+    setMes(event.target.value.substring(5,7));
+    setAno(event.target.value.substring(0,4));
+  };
 
   //Conferir no useEffect se o cliente tem um dispositivo com esse código em seu firebase
 
-  function produtosFetch () {
+  function energyFetch () {
     onValue(ref(database, `dispositivos/${codeParam.code}/energy`), (snapshot) => {
       const d: any = []; //Data temporaria
       const dados = {
@@ -27,14 +47,32 @@ export const Dashboard = () =>{
       setData(d);
     });
   }
+
+  function historicFetch () {
+    onValue(ref(database, `dispositivos/${codeParam.code}/energy_historic/${ano}/${meses[parseInt(mes)]}/${parseInt(dia)}/energy`), (snapshot) => {
+      //console.log(`dispositivos/${codeParam.code}/energy_historic/${ano}/${meses[parseInt(mes)]}/${dia}/energy`);
+      const d: any = []; //Data temporaria
+      snapshot.forEach(item =>{
+        const dados = {
+          hora: item.key  + ':00',
+          KWH: item.val()
+        };
+        d.push(dados);
+      });
+      setHistorico(d);
+      //console.log(historico);
+    });
+  }
+
   useEffect(() => {
-    produtosFetch();
+    energyFetch();
+    historicFetch();
   }, []);
 
   return (
     <LayoutBaseDePagina>
       <PaperLayout icon='dashboard' title={'Dashboard - ' + codeParam.code}>
-        <Paper sx={{margin: '3vh'}}>
+        <Paper  elevation={3} sx={{margin: '3vh'}}>
           <Box sx={{paddingTop: '1vh'}}>
             <Typography variant='h6' textAlign='center'>Dados em tempo real</Typography>
           </Box>
@@ -63,7 +101,7 @@ export const Dashboard = () =>{
                 <Divider/>
                 <Box marginTop={theme.spacing(2)} display='flex' justifyContent='space-between'>
                   <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} fontWeight='600'>Voltagem: </Typography>
-                  <Typography>{item.voltage}</Typography>
+                  <Typography>{item.voltage}V</Typography>
                 </Box>
                 <Divider/>
 
@@ -74,6 +112,41 @@ export const Dashboard = () =>{
 
 
         
+        <Paper  elevation={3} sx={{margin: '3vh', height: '100%'}}>
+          <Box display='flex' flexDirection='column' >
+            <Box sx={{paddingTop: '1vh'}}>
+              <Typography variant='h6' textAlign='center'>Historico</Typography>
+            </Box>
+            <Box display='flex' justifyContent='flex-end' marginTop='3vh' marginRight='6vh'>
+              <TextField
+                id="date"
+                label="Selecionar Intervalo de Tempo"
+                type="date"
+                defaultValue={date}
+                onChange={handleChangeData}
+
+                sx={{ width: 220 }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+              <Button variant='contained' onClick={historicFetch}>Atualizar</Button>
+            </Box>
+            <Box display='flex' justifyContent='center' marginX='3vh'>
+              <LineChart width={900} height={300} data={historico}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="hora">
+                </XAxis>
+                <YAxis label={{ value: 'KW/H', angle: -90, position: 'insideLeft' }} />
+                <Tooltip />
+                <Legend verticalAlign="top" height={36} />
+                <Line type="monotone" dataKey="KWH" stroke={theme.palette.mode == 'dark' ? theme.palette.secondary.main : theme.palette.primary.main} />
+              </LineChart>
+            </Box>
+          </Box>
+        </Paper>
+
       </PaperLayout>
     </LayoutBaseDePagina>
   );
