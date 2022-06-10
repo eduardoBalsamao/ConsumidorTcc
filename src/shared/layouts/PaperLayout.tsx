@@ -15,7 +15,7 @@ export const PaperLayout: React.FC<IBaseLayoutProps> = ({children, title, icon})
       sx={{
         flexDirection: 'column',
         alignItems: 'center',
-        padding: {xs: '3vh', sm: '5vh'},
+        padding: {xs: '1.5vh', sm: '5vh'},
       }}>
       <Paper elevation={3} sx={{width: '100%', minHeight: '90vh'}} >
         <Box sx={{margin: {xs: '2vh 0 0 2vh', sm: '5vh 0 0 5vh'}}} display='flex' alignItems='center'>
