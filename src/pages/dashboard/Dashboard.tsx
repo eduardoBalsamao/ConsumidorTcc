@@ -1,10 +1,8 @@
 import * as React from 'react';
 import {
-  Box, Divider, Paper, Typography, useTheme, 
-  TextField, Button, useMediaQuery, Theme, 
+  Box, Paper, Typography, useTheme,  useMediaQuery, Theme, 
   Dialog, AppBar, Toolbar, IconButton, Table,
   TableBody, TableContainer, TableHead, TableRow,
-  InputAdornment, Chip, MenuItem
 } from '@mui/material';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import { styled } from '@mui/material/styles';
@@ -12,11 +10,10 @@ import { LayoutBaseDePagina, PaperLayout } from '../../shared/layouts';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue, update} from 'firebase/database';
-import { Line, XAxis, YAxis, CartesianGrid, Legend , LineChart, Tooltip, BarChart, Bar, LabelList, Label} from 'recharts';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { GraficoDiario, GraficoMensal, BoxsDashboard } from '../../shared/components';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -60,8 +57,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 export const Dashboard = () =>{
   const database = getDatabase();
   const codeParam = useParams();
-  const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
-  //const mdDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const [data, setData] = useState<any[]>([]);
   const [power, setPower] = useState();
   const [limite, setLimite] = useState<string | null>(null);
@@ -69,7 +64,6 @@ export const Dashboard = () =>{
   const [historico, setHistorico] = useState<any[]>([]);
   const [historicoMensal, setHistoricoMensal] = useState<any[]>([]);
   const theme = useTheme();
-
   const meses = ['0', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   const dateSupp = new Date();
   const [dia, setDia] = useState(String(dateSupp.getDate()).padStart(2, '0'));
@@ -99,9 +93,11 @@ export const Dashboard = () =>{
   const handleClose = () => {
     setOpen(false);
   };
+
   const handleChangeLimite = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLimite(event.target.value);
   };
+
   const handleDelete = () => {
     setLimiteAtual(null);
     update(ref(database, `dispositivos/${codeParam.code}/energy_historic/${ano}/${meses[parseInt(mes)]}/${parseInt(dia)}`), {
@@ -201,203 +197,36 @@ export const Dashboard = () =>{
     getLimite();
   }, []);
 
-
-
   return (
     <LayoutBaseDePagina>
       <PaperLayout icon='dashboard' title={'Dashboard - ' + codeParam.code}>
+        <BoxsDashboard 
+          data={data}
+          limiteAtual={limiteAtual}
+          handleDelete={handleDelete}
+          handleChangeLimite={handleChangeLimite}
+          limitChanger={limitChanger}
+          calculo={calculo}
+        />
 
-        <Box display='flex' flexDirection={smDown ? 'column' : 'row'}>
-          <SpecialBox  elevation={3} sx={{margin: {xs: '2vh', md:'3vh'}, width: {xs: 'auto', md: '50%'}}}>
-            <Box sx={{paddingTop: '1vh'}}>
-              <Typography variant='h6' textAlign='center'>Dados em tempo real</Typography>
-            </Box>
-            {data.map((item) => {
-              return(
-                <Box key={item.key} sx={{padding: '3vh'}}>
-                  <Box marginTop={theme.spacing(2)} display='flex' justifyContent='space-between'>
-                    <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} fontWeight='600'>Corrente: </Typography>
-                    <Typography>{item.current}A</Typography>
-                  </Box>
-                  <Divider/>
-                  <Box marginTop={theme.spacing(2)} display='flex' justifyContent='space-between'>
-                    <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} fontWeight='600'>Frequencia: </Typography>
-                    <Typography>{item.frequency}Hz</Typography>
-                  </Box>
-                  <Divider/>
-                  <Box marginTop={theme.spacing(2)} display='flex' justifyContent='space-between'>
-                    <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} fontWeight='600'>Potencia: </Typography>
-                    <Typography>{item.power}W</Typography>
-                  </Box>
-                  <Divider/>
-                  <Box marginTop={theme.spacing(2)} display='flex' justifyContent='space-between'>
-                    <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} fontWeight='600'>Fator de Potencia: </Typography>
-                    <Typography>{item.powerfactor}</Typography>
-                  </Box>
-                  <Divider/>
-                  <Box marginTop={theme.spacing(2)} display='flex' justifyContent='space-between'>
-                    <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} fontWeight='600'>Voltagem: </Typography>
-                    <Typography>{item.voltage}V</Typography>
-                  </Box>
-                  <Divider/>
-
-                </Box>
-              );
-            })}
-          </SpecialBox>
-
-          <SpecialBox  elevation={3} sx={{margin: {xs: '2vh', md:'3vh'}, width: {xs: 'auto', md: '50%'}}}>
-            <Box sx={{paddingTop: '1vh'}}>
-              <Typography variant='subtitle1' fontWeight='600' textAlign='center'>Definir Limite de Gastos</Typography>
-            </Box>
-            <Box sx={{paddingTop: {xs: '2vh', md: '3vh'}}}>
-              <Typography color={theme.palette.mode=='dark' ? theme.palette.secondary.main : theme.palette.primary.main} variant='subtitle2' textAlign='center'>{calculo()}</Typography>
-              <Divider variant='middle' />
-            </Box>
-            <Box sx={{paddingTop: {xs: '2vh', md: '3vh'}}}>
-              {
-                limiteAtual == null ?
-                  <Chip color='primary' sx={{padding: '1vh'}} size='small' label={<Typography variant='subtitle2'>Nenhum limite adicionado no dia de hoje</Typography>} />
-                  :
-                  <Chip color='primary' sx={{padding: '1vh'}} onDelete={handleDelete}
-                    deleteIcon={<DeleteIcon sx={{paddingLeft: '3vh'}} />} label={<Typography variant='subtitle2'>Limite para hoje: {limiteAtual}KW/H</Typography>} />
-              }
-            </Box>
-
-            <Box sx={{paddingTop: {xs: '2vh', md: '3vh'}, marginBottom: '2vh'}}>
-              <Box display='flex' flexDirection='column' justifyContent='center' marginTop='1vh' marginLeft={smDown ? '5vh' : '10vh'} marginRight={smDown ? '5vh' : '10vh'} marginBottom={smDown ? '5vh' : '0vh'}>
-                <Typography variant='subtitle2' textAlign='center'>Definir Limite:</Typography>
-                <TextField
-                  id="limite"
-                  label="Limite"
-                  type="limite"
-                  onChange={handleChangeLimite}
-                  placeholder='...'
-                  size='small'
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  InputProps={{
-                    endAdornment: <InputAdornment position="end">KW/H</InputAdornment>
-                  }}
-                />
-                <Button onClick={()=>{limitChanger();}} size='small' sx={{marginTop: '2vh'}} variant='contained'>Definir</Button>
-              </Box>
-            </Box>
-          
-          </SpecialBox>
-        </Box>
-
-
+        {/*Grafico diario*/}
+        <GraficoDiario
+          date={date}
+          handleChangeData={handleChangeData}
+          historicFetch={historicFetch}
+          handleClickOpen={handleClickOpen}
+          historico={historico}
+        />
         
-        <SpecialBox   elevation={3} sx={{margin: {xs: '2vh', md:'3vh'}}}>
-          <Box display='flex' flexDirection='column' alignItems='center' >
-            <Box sx={{paddingTop: '1vh'}}>
-              <Typography variant='h6' textAlign='center'>Historico Diario - Energia</Typography>
-            </Box>
-            <Box display='flex' justifyContent='flex-end' marginTop='3vh' marginLeft={smDown ? '0' : '10vh'}>
-              <TextField
-                id="date"
-                label="Selecionar Intervalo de Tempo"
-                type='date'
-                defaultValue={date}
-                onChange={handleChangeData}
-                SelectProps={{
-                  native: true,
-                }}
-              />
-              <Button variant='contained' onClick={historicFetch}>Atualizar</Button>
-            </Box>
-            <Box display='flex' justifyContent='center' marginX='3vh' marginTop={smDown ? '2vh' : 0}>
-              <LineChart width={smDown ? 300 : 900} height={300} data={historico}
-                margin={smDown ? { top: 5, right: 10, left: 0, bottom: 5 } : { top: 5, right: 11, left: 11, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="hora">
-                </XAxis>
-                <YAxis label={smDown ? {display: 'none'} : { value: 'KW/H', angle: -90, position: 'insideLeft' }} />
-                <Tooltip />
-                <Legend verticalAlign="top" height={36} />
-                <Line type="monotone" dataKey="KWH" stroke={theme.palette.mode == 'dark' ? theme.palette.secondary.main : theme.palette.primary.main} />
-              </LineChart>
-            </Box>
-            <Box width='95%' margin='3vh'>
-              <Button onClick={handleClickOpen} fullWidth variant='contained'>Visualizar em Tabela</Button>
-            </Box>
-          </Box>
-        </SpecialBox>
-
-        <SpecialBox   elevation={3} sx={{margin: {xs: '2vh', md:'3vh'}}}>
-          <Box display='flex' flexDirection='column' alignItems='center' >
-            <Box sx={{paddingTop: '1vh'}}>
-              <Typography variant='h6' textAlign='center'>Historico Mensal - Energia</Typography>
-            </Box>
-            <Box display='flex' justifyContent='flex-end' marginTop='3vh' marginLeft={smDown ? '0' : '10vh'}>
-              <TextField
-                label="Selecionar Intervalo de Tempo"
-                value={mesOption}
-                select
-                onChange={handleChangeOption}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              >
-                <MenuItem value={'Janeiro'}>
-                  Janeiro
-                </MenuItem>
-                <MenuItem value={'Fevereiro'}>
-                Fevereiro
-                </MenuItem>
-                <MenuItem value={'Março'}>
-                Março
-                </MenuItem>
-                <MenuItem value={'Abril'}>
-                Abril
-                </MenuItem>
-                <MenuItem value={'Maio'}>
-                Maio
-                </MenuItem>
-                <MenuItem value={'Junho'}>
-                Junho
-                </MenuItem>
-                <MenuItem value={'Julho'}>
-                Julho
-                </MenuItem>
-                <MenuItem value={'Agosto'}>
-                Agosto
-                </MenuItem>
-                <MenuItem value={'Setembro'}>
-                Setembro
-                </MenuItem>
-                <MenuItem value={'Outubro'}>
-                Outubro
-                </MenuItem>
-                <MenuItem value={'Novembro'}>
-                Novembro
-                </MenuItem>
-                <MenuItem value={'Dezembro'}>
-                Dezembro
-                </MenuItem>
-              </TextField>
-              <Button variant='contained' onClick={historicMonthFetch}>Atualizar</Button>
-            </Box>
-            <Box display='flex' justifyContent='center' marginX='3vh' marginTop={smDown ? '2vh' : 0} marginBottom={'2vh'}>
-              <BarChart width={smDown ? 300 : 900} height={300} data={historicoMensal}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="dia">
-                  <Label value="Dias do Mes" offset={0} position="insideBottom" />
-                </XAxis>
-                <YAxis label={smDown ? {display: 'none'} : { value: 'KW/H - Total', angle: -90, position: 'insideLeft' }}  />
-                <Tooltip />
-                <Legend verticalAlign="top" height={36} />
-                <Bar dataKey="energy" fill={theme.palette.mode == 'dark' ? theme.palette.secondary.main : theme.palette.primary.main}>
-                  <LabelList dataKey="energy" position="top" />
-                </Bar>
-              </BarChart>
-            </Box>
-          </Box>
-        </SpecialBox>
-
+        {/*Grafico mensal*/}
+        <GraficoMensal 
+          mesOption={mesOption}
+          handleChangeOption={handleChangeOption}
+          historicMonthFetch={historicMonthFetch}
+          historicoMensal={historicoMensal}
+        />
       </PaperLayout>
+
       <Dialog fullScreen
         open={open}
         onClose={handleClose}
@@ -416,7 +245,6 @@ export const Dashboard = () =>{
             </Typography>
           </Toolbar>
         </AppBar>
-
         <Box display='flex' justifyContent='center' alignItems='center'>
           <SpecialBox sx={{margin: {xs: '2vh', md: '5vh' }, width: '100%'}} elevation={4}>
             <TableContainer component={Paper}>
@@ -443,9 +271,7 @@ export const Dashboard = () =>{
               </Table>
             </TableContainer>
           </SpecialBox>
-
         </Box>
-
       </Dialog>
     </LayoutBaseDePagina>
   );

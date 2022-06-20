@@ -8,7 +8,6 @@ interface IInputProps {
     label: string;
 }
 
-
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
   'label + &': {
     marginTop: theme.spacing(1),
