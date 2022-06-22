@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 import {
-  Box, Paper, Typography, useTheme,  useMediaQuery, Theme, 
+  Box, Paper, Typography, useTheme,
   Dialog, AppBar, Toolbar, IconButton, Table,
   TableBody, TableContainer, TableHead, TableRow,
 } from '@mui/material';

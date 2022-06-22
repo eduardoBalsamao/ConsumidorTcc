@@ -39,6 +39,7 @@
         ],
         "react/prop-types": "off",
         "react/react-in-jsx-scope": "off",
-        "linebreak-style": "off"
+        "linebreak-style": "off",
+        "typescript-eslint/no-explicit-any": "off"
     }
 }
